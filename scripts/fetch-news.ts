@@ -92,14 +92,18 @@ async function main() {
     }
   }
 
-  // 2. Drop URLs we already stored — including hidden ones, so removed items never return
-  const urls = [...byUrl.keys()];
+  // 2. Drop URLs we already stored — including hidden ones, so removed items never return.
+  // Google News URLs are hundreds of chars long, so an `in.()` query-string filter blows
+  // the request-size limit (400 Bad Request) — read all stored URLs and diff in memory.
   const existing = new Set<string>();
-  for (let i = 0; i < urls.length; i += 100) {
-    const { data, error } = await db.from("news_items").select("url").in("url", urls.slice(i, i + 100));
+  const PAGE = 1000;
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await db.from("news_items").select("url").range(from, from + PAGE - 1);
     if (error) throw new Error(error.message);
     for (const row of data ?? []) existing.add(row.url as string);
+    if (!data || data.length < PAGE) break;
   }
+  const urls = [...byUrl.keys()];
   const fresh = urls
     .filter((u) => !existing.has(u))
     .slice(0, MAX_ITEMS)

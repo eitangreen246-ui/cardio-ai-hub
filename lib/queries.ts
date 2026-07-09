@@ -1,7 +1,10 @@
 import { supabase } from "./supabase";
 import { averageRating, type NewsItem, type Prompt, type Recommendation, type Tool } from "./types";
 
-const PROMPT_SELECT = "*, author:profiles(id, full_name), ratings:prompt_ratings(rating, profile_id)";
+// prompts relates to profiles twice (author FK + via prompt_ratings), so the embed
+// must name the FK explicitly or PostgREST rejects it as ambiguous (PGRST201)
+const PROMPT_SELECT =
+  "*, author:profiles!prompts_author_id_fkey(id, full_name), ratings:prompt_ratings(rating, profile_id)";
 
 export type PromptListOpts = { q?: string; field?: string; sort?: string };
 
