@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-raised: var(--raised);
+  --color-ink: var(--ink);
+  --color-soft: var(--soft);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-pulse: var(--pulse);
+  --color-pulse-deep: var(--pulse-deep);
+  --color-mint: var(--mint);
+  --color-amber: var(--amber);
+  --font-display: var(--font-bricolage), Georgia, serif;
+  --font-sans: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", monospace;
+}
+
+:root {
+  color-scheme: light;
+  --bg: #f6f5f0;
+  --surface: #fcfbf7;
+  --raised: #ffffff;
+  --ink: #16181c;
+  --soft: #4d525a;
+  --faint: #8a8e96;
+  --line: #e5e2d8;
+  --pulse: #cf3a41;
+  --pulse-deep: #aa252d;
+  --mint: #0e8a67;
+  --amber: #a06d10;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0e1013;
+  --surface: #15181d;
+  --raised: #1b1f25;
+  --ink: #e9e7e0;
+  --soft: #a6aab1;
+  --faint: #6b7077;
+  --line: #262b32;
+  --pulse: #ef5a61;
+  --pulse-deep: #ff7b81;
+  --mint: #34c795;
+  --amber: #dfa64a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0e1013;
+    --surface: #15181d;
+    --raised: #1b1f25;
+    --ink: #e9e7e0;
+    --soft: #a6aab1;
+    --faint: #6b7077;
+    --line: #262b32;
+    --pulse: #ef5a61;
+    --pulse-deep: #ff7b81;
+    --mint: #34c795;
+    --amber: #dfa64a;
+  }
+}
+
+body {
+  font-family: var(--font-plex), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--pulse) 24%, transparent);
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line bg-surface;
+  }
+  .btn {
+    @apply inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-line bg-raised px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:border-faint disabled:pointer-events-none disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border-transparent bg-pulse text-white hover:bg-pulse-deep;
+  }
+  .btn-sm {
+    @apply gap-1 px-2.5 py-1.5 text-xs;
+  }
+  .field {
+    @apply w-full rounded-lg border border-line bg-raised px-3 py-2 text-sm text-ink outline-none transition-colors placeholder:text-faint focus:border-pulse;
+  }
+  .label {
+    @apply mb-1.5 block font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-faint;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-raised px-2.5 py-0.5 font-mono text-[10.5px] uppercase tracking-[0.08em] text-soft;
+  }
+}
+
+/* signature ECG trace: faint full path + bright travelling segment */
+.ecg-trace {
+  stroke-dasharray: 130 470;
+  stroke-dashoffset: 600;
+  animation: ecg-run 3.6s linear infinite;
+}
+@keyframes ecg-run {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.rise {
+  animation: rise 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
