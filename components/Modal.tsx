@@ -2,6 +2,7 @@
 
 import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 
 // two modals can overlap (name picker under a form modal) — count locks, don't clobber
 let scrollLocks = 0;
@@ -37,7 +38,11 @@ export default function Modal({
 
   if (!open) return null;
 
-  return (
+  // Portal to <body>: cards animate `transform` on entry, which turns them into the
+  // containing block for position:fixed descendants — a modal rendered in place gets
+  // trapped inside the card instead of overlaying the page. Rendering at the document
+  // root makes the overlay immune to any ancestor transform/filter/animation.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/45 p-4 backdrop-blur-sm sm:py-12"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
@@ -58,6 +63,7 @@ export default function Modal({
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
