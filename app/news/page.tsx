@@ -22,6 +22,7 @@ export default async function NewsPage() {
       day: "numeric",
       month: "long",
       year: "numeric",
+      timeZone: "Asia/Jerusalem", // server runs in UTC; group by the team's day
     });
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(item);

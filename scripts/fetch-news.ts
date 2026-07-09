@@ -42,7 +42,7 @@ const FEEDS = [
   gnews('"AI" ECG'),
 ];
 
-const MAX_ITEMS = Number(process.env.NEWS_MAX_ITEMS ?? 50);
+const MAX_ITEMS = Number(process.env.NEWS_MAX_ITEMS) || 50; // || guards NaN/0 from a typo
 const MIN_SCORE = 7;
 
 type Candidate = { title: string; url: string; source: string; published_at: string | null };
@@ -68,6 +68,7 @@ async function main() {
   // 1. Collect candidates from all feeds (dedupe by URL and by title across feeds)
   const byUrl = new Map<string, Candidate>();
   const seenTitles = new Set<string>();
+  let okFeeds = 0;
   for (const feed of FEEDS) {
     try {
       const res = await parser.parseURL(feed.url);
@@ -86,11 +87,14 @@ async function main() {
         seenTitles.add(titleKey);
         byUrl.set(item.link, { title, url: item.link, source, published_at: item.isoDate ?? null });
       }
+      okFeeds += 1;
       console.log(`feed ok: ${feed.name} (${res.items?.length ?? 0} items)`);
     } catch (e) {
       console.error(`feed failed: ${feed.name} — ${e instanceof Error ? e.message : e}`);
     }
   }
+
+  if (okFeeds === 0) throw new Error("all feeds failed — check network / feed URLs");
 
   // 2. Drop URLs we already stored — including hidden ones, so removed items never return.
   // Google News URLs are hundreds of chars long, so an `in.()` query-string filter blows
@@ -114,12 +118,19 @@ async function main() {
     return;
   }
 
-  // 3. Layer 2 of relevance: strict LLM gate (model chosen by the team for cost: Haiku)
+  // 3. Layer 2 of relevance: strict LLM gate (model chosen by the team for cost: Haiku).
+  // Grade in small batches: bounds tokens per call, and a bad batch (truncation, parse
+  // failure, a prompt-injection attempt inside a headline) only affects its own items.
   const anthropic = new Anthropic();
-  const numbered = fresh.map((c, i) => ({ i, title: c.title, source: c.source }));
-  const response = await anthropic.messages.create({
-    model: "claude-haiku-4-5",
-    max_tokens: 8000,
+  const graded: Graded[] = [];
+  const BATCH = 20;
+  for (let start = 0; start < fresh.length; start += BATCH) {
+    const slice = fresh.slice(start, start + BATCH);
+    const numbered = slice.map((c, j) => ({ i: start + j, title: c.title, source: c.source }));
+    try {
+      const response = await anthropic.messages.create({
+        model: "claude-haiku-4-5",
+        max_tokens: 4000,
     system: [
       "You screen news headlines for a cardiology product team's internal news feed.",
       "Score each item 0-10 for relevance. To score 7 or higher an item MUST be about BOTH:",
@@ -130,44 +141,50 @@ async function main() {
       "For every item also write a factual 1-2 sentence summary in plain English based on the headline",
       "(do not invent specifics beyond it), and 1-3 short lowercase topic tags.",
     ].join("\n"),
-    messages: [{ role: "user", content: JSON.stringify(numbered) }],
-    output_config: {
-      format: {
-        type: "json_schema",
-        schema: {
-          type: "object",
-          properties: {
-            items: {
-              type: "array",
-              items: {
-                type: "object",
-                properties: {
-                  i: { type: "integer" },
-                  relevance_score: { type: "integer" },
-                  summary: { type: "string" },
-                  tags: { type: "array", items: { type: "string" } },
+        messages: [{ role: "user", content: JSON.stringify(numbered) }],
+        output_config: {
+          format: {
+            type: "json_schema",
+            schema: {
+              type: "object",
+              properties: {
+                items: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      i: { type: "integer" },
+                      relevance_score: { type: "integer" },
+                      summary: { type: "string" },
+                      tags: { type: "array", items: { type: "string" } },
+                    },
+                    required: ["i", "relevance_score", "summary", "tags"],
+                    additionalProperties: false,
+                  },
                 },
-                required: ["i", "relevance_score", "summary", "tags"],
-                additionalProperties: false,
               },
+              required: ["items"],
+              additionalProperties: false,
             },
           },
-          required: ["items"],
-          additionalProperties: false,
         },
-      },
-    },
-  });
-
-  if (response.stop_reason === "max_tokens") {
-    console.warn("warning: grading response was truncated; lower NEWS_MAX_ITEMS");
+      });
+      if (response.stop_reason === "max_tokens") {
+        console.error(`batch ${start}: response truncated (max_tokens) — skipping batch`);
+        continue;
+      }
+      const text = response.content.find((b) => b.type === "text")?.text ?? '{"items":[]}';
+      graded.push(...(JSON.parse(text) as { items: Graded[] }).items);
+    } catch (e) {
+      console.error(`batch ${start}: grading failed — ${e instanceof Error ? e.message : e}`);
+    }
   }
-  const text = response.content.find((b) => b.type === "text")?.text ?? '{"items":[]}';
-  const graded: { items: Graded[] } = JSON.parse(text);
+  if (graded.length === 0) throw new Error("all grading batches failed");
 
-  // 4. Store the survivors
-  const rows = graded.items
-    .filter((g) => g.relevance_score >= MIN_SCORE && fresh[g.i])
+  // 4. Store every graded item. Items below MIN_SCORE are stored as hidden so the
+  // URL dedupe stops us from re-sending them to the LLM on every future run.
+  const rows = graded
+    .filter((g) => fresh[g.i])
     .map((g) => ({
       title: fresh[g.i].title,
       url: fresh[g.i].url,
@@ -176,13 +193,15 @@ async function main() {
       summary: g.summary,
       tags: (g.tags ?? []).slice(0, 3),
       relevance_score: g.relevance_score,
+      hidden: g.relevance_score < MIN_SCORE,
     }));
 
   if (rows.length > 0) {
     const { error } = await db.from("news_items").upsert(rows, { onConflict: "url", ignoreDuplicates: true });
     if (error) throw new Error(error.message);
   }
-  console.log(`kept ${rows.length}/${fresh.length} new items (score >= ${MIN_SCORE})`);
+  const kept = rows.filter((r) => !r.hidden).length;
+  console.log(`kept ${kept}/${rows.length} graded items (score >= ${MIN_SCORE}); rest stored hidden`);
 }
 
 main()

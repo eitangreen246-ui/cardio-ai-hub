@@ -11,12 +11,9 @@ export const dynamic = "force-dynamic";
 
 export default async function PromptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  let prompt: Prompt | null = null;
-  try {
-    prompt = await getPrompt(id);
-  } catch {
-    prompt = null;
-  }
+  // malformed ids are a 404; real DB errors surface to app/error.tsx
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) notFound();
+  const prompt: Prompt | null = await getPrompt(id);
   if (!prompt) notFound();
 
   const created = new Date(prompt.created_at).toLocaleDateString("en-GB", {

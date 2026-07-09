@@ -11,7 +11,11 @@ export type PromptListOpts = { q?: string; field?: string; sort?: string };
 export async function getPrompts(opts: PromptListOpts = {}): Promise<Prompt[]> {
   let query = supabase().from("prompts").select(PROMPT_SELECT);
   if (opts.q) {
-    const q = opts.q.replace(/[,()]/g, " ").trim();
+    // strip PostgREST or() syntax chars, escape LIKE wildcards so text matches literally
+    const q = opts.q
+      .replace(/[,()]/g, " ")
+      .replace(/[\\%_]/g, (m) => `\\${m}`)
+      .trim();
     if (q) query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%,content.ilike.%${q}%`);
   }
   if (opts.field && opts.field !== "All") query = query.eq("field_of_interest", opts.field);

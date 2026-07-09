@@ -31,6 +31,7 @@ function ToolForm({ initial, onDone }: { initial?: Tool; onDone: () => void }) {
       location: location.trim(),
       status,
     };
+    if (!input.name) return setError("Tool name is required");
     start(async () => {
       try {
         if (initial) await updateTool(initial.id, input);
@@ -142,8 +143,12 @@ export function ToolActions({ tool }: { tool: Tool }) {
   const remove = () => {
     if (!confirm(`Delete "${tool.name}"?`)) return;
     start(async () => {
-      await deleteTool(tool.id);
-      router.refresh();
+      try {
+        await deleteTool(tool.id);
+        router.refresh();
+      } catch {
+        alert("Delete failed — try again.");
+      }
     });
   };
 

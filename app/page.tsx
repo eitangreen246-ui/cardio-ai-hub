@@ -111,7 +111,7 @@ export default async function Home() {
                 <span className="font-mono text-[11px] uppercase tracking-wider text-faint">
                   {n.source || "News"}
                   {n.published_at
-                    ? ` · ${new Date(n.published_at).toLocaleDateString("en-GB", { day: "numeric", month: "short" })}`
+                    ? ` · ${new Date(n.published_at).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "Asia/Jerusalem" })}`
                     : ""}
                 </span>
                 <span className="font-medium transition-colors group-hover:text-pulse">{n.title}</span>

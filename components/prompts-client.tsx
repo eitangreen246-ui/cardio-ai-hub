@@ -31,6 +31,9 @@ function PromptForm({ initial, onDone }: { initial?: Prompt; onDone: () => void 
       content,
       remarks: remarks.trim(),
     };
+    // validate client-side: server-action error messages are redacted in production builds
+    if (!input.title) return setError("Prompt name is required");
+    if (!input.content.trim()) return setError("The prompt text is required");
     start(async () => {
       try {
         if (initial) await updatePrompt(initial.id, input);
@@ -149,9 +152,13 @@ export function PromptOwnerActions({ prompt, afterDelete = false }: { prompt: Pr
   const remove = () => {
     if (!confirm(`Delete "${prompt.title}"? This cannot be undone.`)) return;
     start(async () => {
-      await deletePrompt(prompt.id);
-      if (afterDelete) router.push("/prompts");
-      else router.refresh();
+      try {
+        await deletePrompt(prompt.id);
+        if (afterDelete) router.push("/prompts");
+        else router.refresh();
+      } catch {
+        alert("Delete failed — try again.");
+      }
     });
   };
 
@@ -174,6 +181,11 @@ export function PromptsToolbar({ q, field, sort }: { q: string; field: string; s
   const router = useRouter();
   const [search, setSearch] = useState(q);
 
+  // keep the input in sync when the URL changes underneath us (back/forward)
+  useEffect(() => {
+    setSearch(q);
+  }, [q]);
+
   const apply = (next: { q?: string; field?: string; sort?: string }) => {
     const sp = new URLSearchParams();
     const vq = next.q ?? search;
@@ -190,8 +202,10 @@ export function PromptsToolbar({ q, field, sort }: { q: string; field: string; s
       if (search !== q) apply({ q: search });
     }, 350);
     return () => clearTimeout(t);
+    // q/field/sort are deps so a pending timer is re-created with fresh values and
+    // cannot clobber a filter change made during the debounce window
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
+  }, [search, q, field, sort]);
 
   return (
     <div className="flex flex-wrap items-center gap-2">

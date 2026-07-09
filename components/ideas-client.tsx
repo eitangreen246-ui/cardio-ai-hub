@@ -31,6 +31,7 @@ function IdeaForm({ initial, onDone }: { initial?: Recommendation; onDone: () =>
       kind,
       status,
     };
+    if (!input.name) return setError("Idea name is required");
     start(async () => {
       try {
         if (initial) await updateIdea(initial.id, input);
@@ -145,8 +146,12 @@ export function IdeaOwnerActions({ idea }: { idea: Recommendation }) {
   const remove = () => {
     if (!confirm(`Delete "${idea.name}"?`)) return;
     start(async () => {
-      await deleteIdea(idea.id);
-      router.refresh();
+      try {
+        await deleteIdea(idea.id);
+        router.refresh();
+      } catch {
+        alert("Delete failed — try again.");
+      }
     });
   };
 

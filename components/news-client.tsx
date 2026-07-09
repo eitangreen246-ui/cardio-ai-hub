@@ -12,8 +12,12 @@ export function RemoveNewsButton({ id, title }: { id: string; title: string }) {
   const remove = () => {
     if (!confirm(`Remove this item from the feed?\n\n"${title}"\n\nIt will not come back on future runs.`)) return;
     start(async () => {
-      await hideNewsItem(id);
-      router.refresh();
+      try {
+        await hideNewsItem(id);
+        router.refresh();
+      } catch {
+        alert("Remove failed — try again.");
+      }
     });
   };
 

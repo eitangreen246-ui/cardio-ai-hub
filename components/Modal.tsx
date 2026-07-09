@@ -1,7 +1,10 @@
 "use client";
 
 import { X } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+
+// two modals can overlap (name picker under a form modal) — count locks, don't clobber
+let scrollLocks = 0;
 
 export default function Modal({
   open,
@@ -16,14 +19,19 @@ export default function Modal({
   children: React.ReactNode;
   wide?: boolean;
 }) {
+  const panel = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
+    scrollLocks += 1;
     document.body.style.overflow = "hidden";
+    panel.current?.focus();
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      scrollLocks -= 1;
+      if (scrollLocks === 0) document.body.style.overflow = "";
     };
   }, [open, onClose]);
 
@@ -34,7 +42,14 @@ export default function Modal({
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/45 p-4 backdrop-blur-sm sm:py-12"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className={`card rise w-full ${wide ? "max-w-2xl" : "max-w-md"} bg-raised p-6 shadow-2xl`}>
+      <div
+        ref={panel}
+        tabIndex={-1}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        className={`card rise w-full ${wide ? "max-w-2xl" : "max-w-md"} bg-raised p-6 shadow-2xl outline-none`}
+      >
         <div className="mb-4 flex items-center justify-between gap-4">
           <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>
           <button onClick={onClose} className="btn btn-sm" aria-label="Close">

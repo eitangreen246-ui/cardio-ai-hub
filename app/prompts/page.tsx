@@ -12,16 +12,20 @@ export const metadata = { title: "Prompt library" };
 function PromptCard({ prompt, index }: { prompt: Prompt; index: number }) {
   const avg = averageRating(prompt.ratings);
   return (
-    <Link
-      href={`/prompts/${prompt.id}`}
-      className="card rise group flex flex-col p-5 transition-colors hover:border-pulse/60"
+    <div
+      className="card rise group relative flex flex-col p-5 transition-colors hover:border-pulse/60"
       style={{ animationDelay: `${Math.min(index, 8) * 50}ms` }}
     >
       <div className="flex items-start justify-between gap-3">
         <h2 className="font-display text-lg font-semibold leading-snug tracking-tight transition-colors group-hover:text-pulse">
-          {prompt.title}
+          {/* stretched link: whole card is clickable without nesting the copy button in an anchor */}
+          <Link href={`/prompts/${prompt.id}`} className="outline-none after:absolute after:inset-0">
+            {prompt.title}
+          </Link>
         </h2>
-        <CopyButton small text={prompt.content} promptId={prompt.id} />
+        <span className="relative z-10">
+          <CopyButton small text={prompt.content} promptId={prompt.id} />
+        </span>
       </div>
       {prompt.description && <p className="mt-1.5 line-clamp-2 text-sm text-soft">{prompt.description}</p>}
       <div className="mt-auto flex flex-wrap items-center gap-x-3 gap-y-2 pt-4">
@@ -34,7 +38,7 @@ function PromptCard({ prompt, index }: { prompt: Prompt; index: number }) {
           {prompt.author?.full_name ?? "Unknown"} · copied {prompt.copy_count}×
         </span>
       </div>
-    </Link>
+    </div>
   );
 }
 

@@ -33,8 +33,12 @@ export default function StarRating({ promptId, ratings }: { promptId: string; ra
   const rate = (n: number) => {
     if (!profile) return openPicker();
     start(async () => {
-      await ratePrompt(promptId, profile.id, n);
-      router.refresh();
+      try {
+        await ratePrompt(promptId, profile.id, n);
+        router.refresh();
+      } catch {
+        alert("Could not save your rating — check your connection and try again.");
+      }
     });
   };
 
