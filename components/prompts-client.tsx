@@ -4,12 +4,10 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import Modal from "./Modal";
-import { useIdentity } from "@/lib/identity";
 import { createPrompt, deletePrompt, updatePrompt, type PromptInput } from "@/app/actions/prompts";
 import { FIELD_OPTIONS, type Prompt } from "@/lib/types";
 
 function PromptForm({ initial, onDone }: { initial?: Prompt; onDone: () => void }) {
-  const { profile } = useIdentity();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -37,7 +35,7 @@ function PromptForm({ initial, onDone }: { initial?: Prompt; onDone: () => void 
     start(async () => {
       try {
         if (initial) await updatePrompt(initial.id, input);
-        else await createPrompt(input, profile?.id ?? "");
+        else await createPrompt(input);
         router.refresh();
         onDone();
       } catch (e) {
@@ -94,19 +92,19 @@ function PromptForm({ initial, onDone }: { initial?: Prompt; onDone: () => void 
         )}
       </div>
       <div>
-        <label className="label">The prompt *</label>
+        <label className="label">The prompt * — the Copy button copies exactly this text</label>
         <textarea
           className="field min-h-44 font-mono text-[13px] leading-relaxed"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          placeholder="Paste the full prompt text…"
+          placeholder="Paste the full prompt text — nothing else. Notes go in Remarks below."
         />
         <p className="mt-1.5 rounded-lg border border-amber/40 bg-amber/10 px-3 py-1.5 text-xs text-amber">
           Reminder: never include patient data (PHI) in prompts.
         </p>
       </div>
       <div>
-        <label className="label">Remarks (optional)</label>
+        <label className="label">Remarks (optional) — notes for teammates, never copied</label>
         <input
           className="field"
           value={remarks}
@@ -127,11 +125,10 @@ function PromptForm({ initial, onDone }: { initial?: Prompt; onDone: () => void 
 }
 
 export function NewPromptButton() {
-  const { profile, openPicker } = useIdentity();
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-primary" onClick={() => (profile ? setOpen(true) : openPicker())}>
+      <button className="btn btn-primary" onClick={() => setOpen(true)}>
         <Plus size={15} /> New prompt
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Add a prompt" wide>
@@ -141,13 +138,10 @@ export function NewPromptButton() {
   );
 }
 
-export function PromptOwnerActions({ prompt, afterDelete = false }: { prompt: Prompt; afterDelete?: boolean }) {
-  const { profile } = useIdentity();
+export function PromptActions({ prompt, afterDelete = false }: { prompt: Prompt; afterDelete?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
-
-  if (!profile || profile.id !== prompt.author_id) return null;
 
   const remove = () => {
     if (!confirm(`Delete "${prompt.title}"? This cannot be undone.`)) return;

@@ -15,10 +15,9 @@ function validate(input: IdeaInput) {
   if (!input.name.trim()) throw new Error("Idea name is required");
 }
 
-export async function createIdea(input: IdeaInput, authorId: string) {
+export async function createIdea(input: IdeaInput) {
   validate(input);
-  if (!authorId) throw new Error("Pick your name first");
-  const { error } = await supabase().from("recommendations").insert({ ...input, author_id: authorId });
+  const { error } = await supabase().from("recommendations").insert(input);
   if (error) throw new Error(error.message);
   revalidatePath("/ideas");
   revalidatePath("/");

@@ -4,12 +4,10 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import Modal from "./Modal";
-import { useIdentity } from "@/lib/identity";
 import { createIdea, deleteIdea, updateIdea, type IdeaInput } from "@/app/actions/ideas";
 import { IDEA_KINDS, IDEA_STATUSES, TOOL_CATEGORIES, type Recommendation } from "@/lib/types";
 
 function IdeaForm({ initial, onDone }: { initial?: Recommendation; onDone: () => void }) {
-  const { profile } = useIdentity();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +33,7 @@ function IdeaForm({ initial, onDone }: { initial?: Recommendation; onDone: () =>
     start(async () => {
       try {
         if (initial) await updateIdea(initial.id, input);
-        else await createIdea(input, profile?.id ?? "");
+        else await createIdea(input);
         router.refresh();
         onDone();
       } catch (e) {
@@ -121,11 +119,10 @@ function IdeaForm({ initial, onDone }: { initial?: Recommendation; onDone: () =>
 }
 
 export function NewIdeaButton() {
-  const { profile, openPicker } = useIdentity();
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-primary" onClick={() => (profile ? setOpen(true) : openPicker())}>
+      <button className="btn btn-primary" onClick={() => setOpen(true)}>
         <Plus size={15} /> New idea
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Propose an AI tool" wide>
@@ -135,13 +132,11 @@ export function NewIdeaButton() {
   );
 }
 
-export function IdeaOwnerActions({ idea }: { idea: Recommendation }) {
-  const { profile } = useIdentity();
+/** Opens the same popup as "New idea", prefilled with this idea's details. */
+export function IdeaActions({ idea }: { idea: Recommendation }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [pending, start] = useTransition();
-
-  if (!profile || profile.id !== idea.author_id) return null;
 
   const remove = () => {
     if (!confirm(`Delete "${idea.name}"?`)) return;

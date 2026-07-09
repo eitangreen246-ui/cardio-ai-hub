@@ -2,8 +2,8 @@
 
 import { Star } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useIdentity } from "@/lib/identity";
+import { useEffect, useState, useTransition } from "react";
+import { getAnonId } from "@/lib/anon";
 import { ratePrompt } from "@/app/actions/prompts";
 import type { Rating } from "@/lib/types";
 
@@ -22,19 +22,22 @@ export function Stars({ value, size = 13 }: { value: number | null; size?: numbe
 }
 
 export default function StarRating({ promptId, ratings }: { promptId: string; ratings: Rating[] }) {
-  const { profile, openPicker } = useIdentity();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [hover, setHover] = useState(0);
+  const [raterId, setRaterId] = useState<string | null>(null);
 
-  const mine = profile ? (ratings.find((r) => r.profile_id === profile.id)?.rating ?? 0) : 0;
+  // browser-only id — read after mount to avoid SSR/hydration mismatch
+  useEffect(() => setRaterId(getAnonId()), []);
+
+  const mine = raterId ? (ratings.find((r) => r.profile_id === raterId)?.rating ?? 0) : 0;
   const avg = ratings.length ? ratings.reduce((s, r) => s + r.rating, 0) / ratings.length : null;
 
   const rate = (n: number) => {
-    if (!profile) return openPicker();
+    if (!raterId) return;
     start(async () => {
       try {
-        await ratePrompt(promptId, profile.id, n);
+        await ratePrompt(promptId, raterId, n);
         router.refresh();
       } catch {
         alert("Could not save your rating — check your connection and try again.");
@@ -48,7 +51,7 @@ export default function StarRating({ promptId, ratings }: { promptId: string; ra
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}
-            disabled={pending}
+            disabled={pending || !raterId}
             onClick={() => rate(n)}
             onMouseEnter={() => setHover(n)}
             className="cursor-pointer p-0.5 transition-transform hover:scale-110"

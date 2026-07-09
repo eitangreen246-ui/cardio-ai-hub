@@ -1,5 +1,5 @@
 import DbNotice from "@/components/DbNotice";
-import { IdeaOwnerActions, NewIdeaButton } from "@/components/ideas-client";
+import { IdeaActions, NewIdeaButton } from "@/components/ideas-client";
 import { getIdeas } from "@/lib/queries";
 import { IDEA_KINDS, IDEA_STATUSES, type Recommendation } from "@/lib/types";
 
@@ -60,7 +60,6 @@ export default async function IdeasPage() {
                 <span className="badge">{kindLabel(idea.kind)}</span>
                 <span className="badge">{idea.category}</span>
                 <span className="font-mono text-[11px] text-faint">
-                  {idea.author?.full_name ?? "Unknown"} ·{" "}
                   {new Date(idea.created_at).toLocaleDateString("en-GB", {
                     day: "numeric",
                     month: "short",
@@ -69,7 +68,7 @@ export default async function IdeasPage() {
                 </span>
               </div>
             </div>
-            <IdeaOwnerActions idea={idea} />
+            <IdeaActions idea={idea} />
           </div>
         ))}
       </div>

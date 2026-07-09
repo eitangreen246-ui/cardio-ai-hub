@@ -44,11 +44,10 @@ export type Prompt = {
   description: string;
   field_of_interest: string;
   remarks: string;
-  author_id: string;
+  author_id: string | null;
   copy_count: number;
   created_at: string;
   updated_at: string;
-  author?: Pick<Profile, "id" | "full_name"> | null;
   ratings?: Rating[];
 };
 
@@ -62,7 +61,6 @@ export type Tool = {
   created_by: string | null;
   created_at: string;
   updated_at: string;
-  author?: Pick<Profile, "id" | "full_name"> | null;
 };
 
 export type Recommendation = {
@@ -72,9 +70,8 @@ export type Recommendation = {
   category: string;
   kind: "agent" | "prompt" | "automation" | "custom_gpt" | "other";
   status: "submitted" | "under_review" | "in_development" | "done";
-  author_id: string;
+  author_id: string | null;
   created_at: string;
-  author?: Pick<Profile, "id" | "full_name"> | null;
 };
 
 export type NewsItem = {

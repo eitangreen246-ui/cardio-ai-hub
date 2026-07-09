@@ -15,9 +15,9 @@ function validate(input: ToolInput) {
   if (!input.name.trim()) throw new Error("Tool name is required");
 }
 
-export async function createTool(input: ToolInput, creatorId: string | null) {
+export async function createTool(input: ToolInput) {
   validate(input);
-  const { error } = await supabase().from("tools").insert({ ...input, created_by: creatorId });
+  const { error } = await supabase().from("tools").insert(input);
   if (error) throw new Error(error.message);
   revalidatePath("/tools");
   revalidatePath("/");

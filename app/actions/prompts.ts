@@ -22,12 +22,11 @@ function revalidate(id?: string) {
   if (id) revalidatePath(`/prompts/${id}`);
 }
 
-export async function createPrompt(input: PromptInput, authorId: string) {
+export async function createPrompt(input: PromptInput) {
   validate(input);
-  if (!authorId) throw new Error("Pick your name first");
   const { data, error } = await supabase()
     .from("prompts")
-    .insert({ ...input, author_id: authorId })
+    .insert(input)
     .select("id")
     .single();
   if (error) throw new Error(error.message);
@@ -51,11 +50,15 @@ export async function deletePrompt(id: string) {
   revalidate(id);
 }
 
-export async function ratePrompt(promptId: string, profileId: string, rating: number) {
+/** raterId is an anonymous per-browser uuid (lib/anon.ts) — one rating per browser. */
+export async function ratePrompt(promptId: string, raterId: string, rating: number) {
   if (rating < 1 || rating > 5) throw new Error("Rating must be 1-5");
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raterId)) {
+    throw new Error("Invalid rater id");
+  }
   const { error } = await supabase()
     .from("prompt_ratings")
-    .upsert({ prompt_id: promptId, profile_id: profileId, rating }, { onConflict: "prompt_id,profile_id" });
+    .upsert({ prompt_id: promptId, profile_id: raterId, rating }, { onConflict: "prompt_id,profile_id" });
   if (error) throw new Error(error.message);
   revalidate(promptId);
 }

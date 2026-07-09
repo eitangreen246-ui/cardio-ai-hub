@@ -2,10 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HeartPulse, Moon, Sun, UserRound } from "lucide-react";
+import { HeartPulse, Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useIdentity } from "@/lib/identity";
-import NamePicker from "./NamePicker";
 
 const NAV = [
   { href: "/prompts", label: "Prompts" },
@@ -43,44 +41,34 @@ function ThemeToggle() {
 
 export default function Header() {
   const pathname = usePathname();
-  const { profile, openPicker, ready } = useIdentity();
 
   return (
-    <>
-      <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
-        <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
-          <Link href="/" className="flex shrink-0 items-center gap-2">
-            <HeartPulse className="text-pulse" size={20} strokeWidth={2.2} />
-            <span className="font-display text-[17px] font-bold tracking-tight">
-              Cardio <span className="text-pulse">AI</span> Hub
-            </span>
-          </Link>
-          <nav className="flex flex-1 items-center gap-0.5 overflow-x-auto">
-            {NAV.map((n) => {
-              const active = pathname === n.href || pathname.startsWith(`${n.href}/`);
-              return (
-                <Link
-                  key={n.href}
-                  href={n.href}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
-                    active ? "bg-pulse/10 text-pulse" : "text-soft hover:text-ink"
-                  }`}
-                >
-                  {n.label}
-                </Link>
-              );
-            })}
-          </nav>
-          <div className="flex shrink-0 items-center gap-2">
-            <ThemeToggle />
-            <button onClick={openPicker} className="btn btn-sm max-w-44" title="Switch user">
-              <UserRound size={14} className="shrink-0 text-pulse" />
-              <span className="truncate">{ready && profile ? profile.name : "Choose name"}</span>
-            </button>
-          </div>
-        </div>
-      </header>
-      <NamePicker />
-    </>
+    <header className="sticky top-0 z-40 border-b border-line bg-bg/85 backdrop-blur">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-3 px-4 sm:gap-6 sm:px-6">
+        <Link href="/" className="flex shrink-0 items-center gap-2">
+          <HeartPulse className="text-pulse" size={20} strokeWidth={2.2} />
+          <span className="font-display text-[17px] font-bold tracking-tight">
+            Cardio <span className="text-pulse">AI</span> Hub
+          </span>
+        </Link>
+        <nav className="flex flex-1 items-center gap-0.5 overflow-x-auto">
+          {NAV.map((n) => {
+            const active = pathname === n.href || pathname.startsWith(`${n.href}/`);
+            return (
+              <Link
+                key={n.href}
+                href={n.href}
+                className={`rounded-lg px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors ${
+                  active ? "bg-pulse/10 text-pulse" : "text-soft hover:text-ink"
+                }`}
+              >
+                {n.label}
+              </Link>
+            );
+          })}
+        </nav>
+        <ThemeToggle />
+      </div>
+    </header>
   );
 }

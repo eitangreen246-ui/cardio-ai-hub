@@ -34,9 +34,7 @@ function PromptCard({ prompt, index }: { prompt: Prompt; index: number }) {
           <Stars value={avg} />
           <span className="font-mono text-[11px] text-faint">{avg ? avg.toFixed(1) : "—"}</span>
         </span>
-        <span className="ml-auto font-mono text-[11px] text-faint">
-          {prompt.author?.full_name ?? "Unknown"} · copied {prompt.copy_count}×
-        </span>
+        <span className="ml-auto font-mono text-[11px] text-faint">copied {prompt.copy_count}×</span>
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import CopyButton from "@/components/CopyButton";
 import StarRating from "@/components/StarRating";
-import { PromptOwnerActions } from "@/components/prompts-client";
+import { PromptActions } from "@/components/prompts-client";
 import { getPrompt } from "@/lib/queries";
 import type { Prompt } from "@/lib/types";
 
@@ -32,11 +32,10 @@ export default async function PromptPage({ params }: { params: Promise<{ id: str
       </Link>
       <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
         <h1 className="font-display text-3xl font-bold tracking-tight">{prompt.title}</h1>
-        <PromptOwnerActions prompt={prompt} afterDelete />
+        <PromptActions prompt={prompt} afterDelete />
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <span className="badge">{prompt.field_of_interest}</span>
-        <span className="badge">{prompt.author?.full_name ?? "Unknown"}</span>
         <span className="badge">added {created}</span>
         <span className="badge">copied {prompt.copy_count}×</span>
       </div>

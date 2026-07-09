@@ -1,10 +1,7 @@
 import { supabase } from "./supabase";
 import { averageRating, type NewsItem, type Prompt, type Recommendation, type Tool } from "./types";
 
-// prompts relates to profiles twice (author FK + via prompt_ratings), so the embed
-// must name the FK explicitly or PostgREST rejects it as ambiguous (PGRST201)
-const PROMPT_SELECT =
-  "*, author:profiles!prompts_author_id_fkey(id, full_name), ratings:prompt_ratings(rating, profile_id)";
+const PROMPT_SELECT = "*, ratings:prompt_ratings(rating, profile_id)";
 
 export type PromptListOpts = { q?: string; field?: string; sort?: string };
 
@@ -39,7 +36,7 @@ export async function getPrompt(id: string): Promise<Prompt | null> {
 export async function getTools(): Promise<Tool[]> {
   const { data, error } = await supabase()
     .from("tools")
-    .select("*, author:profiles(id, full_name)")
+    .select("*")
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as Tool[];
@@ -48,7 +45,7 @@ export async function getTools(): Promise<Tool[]> {
 export async function getIdeas(): Promise<Recommendation[]> {
   const { data, error } = await supabase()
     .from("recommendations")
-    .select("*, author:profiles(id, full_name)")
+    .select("*")
     .order("created_at", { ascending: false });
   if (error) throw new Error(error.message);
   return (data ?? []) as unknown as Recommendation[];

@@ -4,12 +4,10 @@ import { Pencil, Plus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import Modal from "./Modal";
-import { useIdentity } from "@/lib/identity";
 import { createTool, deleteTool, updateTool, type ToolInput } from "@/app/actions/tools";
 import { TOOL_CATEGORIES, type Tool } from "@/lib/types";
 
 function ToolForm({ initial, onDone }: { initial?: Tool; onDone: () => void }) {
-  const { profile } = useIdentity();
   const router = useRouter();
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +33,7 @@ function ToolForm({ initial, onDone }: { initial?: Tool; onDone: () => void }) {
     start(async () => {
       try {
         if (initial) await updateTool(initial.id, input);
-        else await createTool(input, profile?.id ?? null);
+        else await createTool(input);
         router.refresh();
         onDone();
       } catch (e) {
@@ -74,28 +72,18 @@ function ToolForm({ initial, onDone }: { initial?: Tool; onDone: () => void }) {
             <option value="__custom">Custom…</option>
           </select>
         </div>
-        {category === "__custom" ? (
-          <div>
-            <label className="label">Custom category</label>
-            <input className="field" value={customCat} onChange={(e) => setCustomCat(e.target.value)} />
-          </div>
-        ) : (
-          <div>
-            <label className="label">Status</label>
-            <select className="field" value={status} onChange={(e) => setStatus(e.target.value as ToolInput["status"])}>
-              <option value="ready">Ready to use</option>
-              <option value="in_development">In development</option>
-            </select>
-          </div>
-        )}
-      </div>
-      {category === "__custom" && (
         <div>
           <label className="label">Status</label>
           <select className="field" value={status} onChange={(e) => setStatus(e.target.value as ToolInput["status"])}>
             <option value="ready">Ready to use</option>
             <option value="in_development">In development</option>
           </select>
+        </div>
+      </div>
+      {category === "__custom" && (
+        <div>
+          <label className="label">Custom category</label>
+          <input className="field" value={customCat} onChange={(e) => setCustomCat(e.target.value)} />
         </div>
       )}
       <div>
@@ -120,11 +108,10 @@ function ToolForm({ initial, onDone }: { initial?: Tool; onDone: () => void }) {
 }
 
 export function NewToolButton() {
-  const { profile, openPicker } = useIdentity();
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-primary" onClick={() => (profile ? setOpen(true) : openPicker())}>
+      <button className="btn btn-primary" onClick={() => setOpen(true)}>
         <Plus size={15} /> New tool
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Add a tool" wide>
@@ -134,7 +121,7 @@ export function NewToolButton() {
   );
 }
 
-/** Tool cards are shared team assets — anyone can edit or delete them. */
+/** Opens the same popup as "New tool", prefilled with the card's details. */
 export function ToolActions({ tool }: { tool: Tool }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -154,16 +141,11 @@ export function ToolActions({ tool }: { tool: Tool }) {
 
   return (
     <span className="inline-flex gap-2">
-      <button className="btn btn-sm" onClick={() => setOpen(true)} aria-label={`Edit ${tool.name}`}>
-        <Pencil size={13} />
+      <button className="btn btn-sm" onClick={() => setOpen(true)}>
+        <Pencil size={13} /> Edit
       </button>
-      <button
-        className="btn btn-sm text-pulse hover:border-pulse"
-        disabled={pending}
-        onClick={remove}
-        aria-label={`Delete ${tool.name}`}
-      >
-        <Trash2 size={13} />
+      <button className="btn btn-sm text-pulse hover:border-pulse" disabled={pending} onClick={remove}>
+        <Trash2 size={13} /> Delete
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title="Edit tool" wide>
         <ToolForm initial={tool} onDone={() => setOpen(false)} />
