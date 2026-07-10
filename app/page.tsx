@@ -83,10 +83,10 @@ export default async function Home() {
             key={s.href}
             href={s.href}
             className="card dash-card card-glow rise group relative overflow-hidden p-7"
-            style={{ animationDelay: `${i * 70}ms`, ["--glow-tint" as string]: `color-mix(in oklch, ${s.color} 30%, transparent)` }}
+            style={{ animationDelay: `${i * 70}ms`, ["--accent" as string]: s.color }}
           >
             <div className="relative flex items-start justify-between">
-              <span className="icon-badge" style={{ color: s.color, ["--glow-color" as string]: `color-mix(in oklch, ${s.color} 55%, transparent)` }}>
+              <span className="icon-badge" style={{ color: s.color }}>
                 <s.icon size={21} />
               </span>
               <span className="text-right">

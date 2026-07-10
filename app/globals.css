@@ -107,12 +107,16 @@ body {
   .card:hover {
     transform: translateY(-5px);
     border-color: color-mix(in oklch, var(--ink) 12%, var(--line));
+    box-shadow: var(--shadow-md);
   }
   .dash-card {
     border-radius: 28px;
   }
+  /* --accent is set per-card (inline style) to the section's raw color var,
+     e.g. var(--blue); icon-badge, card-glow and this hover shadow all key off it */
   .dash-card:hover {
     transform: translateY(-6px) scale(1.015);
+    box-shadow: 0 24px 44px -16px color-mix(in oklch, var(--accent, transparent) 45%, transparent);
   }
 
   /* pill buttons */
@@ -248,7 +252,7 @@ body {
     align-items: center;
     justify-content: center;
     box-shadow:
-      0 12px 22px -8px var(--glow-color, transparent),
+      0 12px 22px -8px color-mix(in oklch, var(--accent, transparent) 55%, transparent),
       0 2px 5px rgba(20, 14, 4, 0.08);
   }
 
@@ -258,7 +262,7 @@ body {
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: radial-gradient(150px 150px at 88% -14%, var(--glow-tint, transparent), transparent 70%);
+    background: radial-gradient(150px 150px at 88% -14%, color-mix(in oklch, var(--accent, transparent) 30%, transparent), transparent 70%);
     pointer-events: none;
   }
 }
