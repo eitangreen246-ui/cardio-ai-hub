@@ -1,6 +1,6 @@
 "use client";
 
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import Modal from "./Modal";
@@ -47,7 +47,9 @@ function PromptForm({ initial, onDone }: { initial?: Prompt; onDone: () => void 
   return (
     <div className="flex flex-col gap-4">
       {error && (
-        <p className="rounded-lg border border-pulse/40 bg-pulse/5 px-3 py-2 text-sm text-pulse">{error}</p>
+        <p className="rounded-2xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "color-mix(in oklch, var(--coral) 40%, transparent)", background: "color-mix(in oklch, var(--coral) 6%, transparent)", color: "var(--coral)" }}>
+          {error}
+        </p>
       )}
       <div>
         <label className="label">Prompt name *</label>
@@ -94,12 +96,15 @@ function PromptForm({ initial, onDone }: { initial?: Prompt; onDone: () => void 
       <div>
         <label className="label">The prompt * — the Copy button copies exactly this text</label>
         <textarea
-          className="field min-h-44 font-mono text-[13px] leading-relaxed"
+          className="field field-block min-h-44 font-mono text-[13px] leading-relaxed"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Paste the full prompt text — nothing else. Notes go in Remarks below."
         />
-        <p className="mt-1.5 rounded-lg border border-amber/40 bg-amber/10 px-3 py-1.5 text-xs text-amber">
+        <p
+          className="mt-1.5 rounded-xl border px-3 py-1.5 text-xs"
+          style={{ borderColor: "color-mix(in oklch, var(--amber) 40%, transparent)", background: "color-mix(in oklch, var(--amber) 8%, transparent)", color: "var(--amber)" }}
+        >
           Reminder: never include patient data (PHI) in prompts.
         </p>
       </div>
@@ -112,11 +117,11 @@ function PromptForm({ initial, onDone }: { initial?: Prompt; onDone: () => void 
           placeholder='e.g. "Works best with long documents attached"'
         />
       </div>
-      <div className="flex justify-end gap-2">
+      <div className="mt-1 flex justify-end gap-2">
         <button className="btn" onClick={onDone}>
           Cancel
         </button>
-        <button className="btn btn-primary" disabled={pending} onClick={submit}>
+        <button className="btn btn-blue btn-solid" disabled={pending} onClick={submit}>
           {initial ? "Save changes" : "Add prompt"}
         </button>
       </div>
@@ -128,10 +133,10 @@ export function NewPromptButton() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-primary" onClick={() => setOpen(true)}>
+      <button className="btn btn-blue btn-solid" onClick={() => setOpen(true)}>
         <Plus size={15} /> New prompt
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Add a prompt" wide>
+      <Modal open={open} onClose={() => setOpen(false)} title="Add a prompt">
         <PromptForm onDone={() => setOpen(false)} />
       </Modal>
     </>
@@ -161,10 +166,10 @@ export function PromptActions({ prompt, afterDelete = false }: { prompt: Prompt;
       <button className="btn btn-sm" onClick={() => setOpen(true)}>
         <Pencil size={13} /> Edit
       </button>
-      <button className="btn btn-sm text-pulse hover:border-pulse" disabled={pending} onClick={remove}>
+      <button className="btn btn-sm btn-coral" disabled={pending} onClick={remove}>
         <Trash2 size={13} /> Delete
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Edit prompt" wide>
+      <Modal open={open} onClose={() => setOpen(false)} title="Edit prompt">
         <PromptForm initial={prompt} onDone={() => setOpen(false)} />
       </Modal>
     </span>
@@ -202,13 +207,16 @@ export function PromptsToolbar({ q, field, sort }: { q: string; field: string; s
   }, [search, q, field, sort]);
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
-      <input
-        className="field max-w-64"
-        placeholder="Search prompts…"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+    <div className="flex flex-wrap items-center gap-2.5">
+      <div className="relative">
+        <Search size={15} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-faint" />
+        <input
+          className="field field-icon-left w-[230px]"
+          placeholder="Search prompts…"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+      </div>
       <select className="field w-auto" value={field} onChange={(e) => apply({ field: e.target.value })}>
         <option value="All">All fields</option>
         {FIELD_OPTIONS.map((f) => (

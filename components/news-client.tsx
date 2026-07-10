@@ -1,6 +1,6 @@
 "use client";
 
-import { EyeOff } from "lucide-react";
+import { CircleSlash } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { hideNewsItem } from "@/app/actions/news";
@@ -25,10 +25,10 @@ export function RemoveNewsButton({ id, title }: { id: string; title: string }) {
     <button
       onClick={remove}
       disabled={pending}
-      className="inline-flex cursor-pointer items-center gap-1 text-sm font-medium text-faint transition-colors hover:text-pulse disabled:opacity-50"
+      className="hover-coral inline-flex cursor-pointer items-center gap-1 text-sm font-semibold text-faint transition-colors disabled:opacity-50"
       title="Remove this item (it will never be re-imported)"
     >
-      <EyeOff size={13} /> Remove
+      <CircleSlash size={13} /> Remove
     </button>
   );
 }

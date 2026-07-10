@@ -4,7 +4,7 @@ import { X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
-// two modals can overlap (name picker under a form modal) — count locks, don't clobber
+// two modals can overlap — count locks, don't clobber
 let scrollLocks = 0;
 
 export default function Modal({
@@ -12,7 +12,6 @@ export default function Modal({
   onClose,
   title,
   children,
-  wide = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -44,7 +43,8 @@ export default function Modal({
   // root makes the overlay immune to any ancestor transform/filter/animation.
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/45 p-4 backdrop-blur-sm sm:py-12"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 backdrop-blur-sm sm:py-12"
+      style={{ background: "var(--overlay)" }}
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
@@ -53,11 +53,17 @@ export default function Modal({
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`card rise w-full ${wide ? "max-w-2xl" : "max-w-md"} bg-raised p-6 shadow-2xl outline-none`}
+        className="rise w-full max-w-[560px] p-7 outline-none"
+        style={{ background: "var(--raised)", borderRadius: "26px", boxShadow: "var(--shadow-lg)" }}
       >
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h2 className="font-display text-xl font-semibold tracking-tight">{title}</h2>
-          <button onClick={onClose} className="btn btn-sm" aria-label="Close">
+        <div className="mb-5 flex items-center justify-between gap-4">
+          <h2 className="font-display text-xl font-bold tracking-tight">{title}</h2>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full border transition-colors hover:border-blue"
+            style={{ borderColor: "var(--line)", background: "var(--raised)" }}
+          >
             <X size={14} />
           </button>
         </div>

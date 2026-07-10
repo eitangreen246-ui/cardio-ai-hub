@@ -7,7 +7,7 @@ export default function Error({ reset }: { error: Error & { digest?: string }; r
       <p className="text-sm text-soft">
         The last action didn&apos;t go through — usually a brief network or database hiccup.
       </p>
-      <button className="btn btn-primary" onClick={reset}>
+      <button className="btn btn-blue btn-solid" onClick={reset}>
         Try again
       </button>
     </main>

@@ -45,7 +45,9 @@ function ToolForm({ initial, onDone }: { initial?: Tool; onDone: () => void }) {
   return (
     <div className="flex flex-col gap-4">
       {error && (
-        <p className="rounded-lg border border-pulse/40 bg-pulse/5 px-3 py-2 text-sm text-pulse">{error}</p>
+        <p className="rounded-2xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "color-mix(in oklch, var(--coral) 40%, transparent)", background: "color-mix(in oklch, var(--coral) 6%, transparent)", color: "var(--coral)" }}>
+          {error}
+        </p>
       )}
       <div>
         <label className="label">Tool name *</label>
@@ -54,7 +56,7 @@ function ToolForm({ initial, onDone }: { initial?: Tool; onDone: () => void }) {
       <div>
         <label className="label">Purpose</label>
         <textarea
-          className="field min-h-20"
+          className="field field-block min-h-20"
           value={purpose}
           onChange={(e) => setPurpose(e.target.value)}
           placeholder="What is this tool for?"
@@ -95,11 +97,11 @@ function ToolForm({ initial, onDone }: { initial?: Tool; onDone: () => void }) {
           placeholder="Link or description, e.g. https://… or 'Ask IT for a license'"
         />
       </div>
-      <div className="flex justify-end gap-2">
+      <div className="mt-1 flex justify-end gap-2">
         <button className="btn" onClick={onDone}>
           Cancel
         </button>
-        <button className="btn btn-primary" disabled={pending} onClick={submit}>
+        <button className="btn btn-violet btn-solid" disabled={pending} onClick={submit}>
           {initial ? "Save changes" : "Add tool"}
         </button>
       </div>
@@ -111,10 +113,10 @@ export function NewToolButton() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-primary" onClick={() => setOpen(true)}>
+      <button className="btn btn-violet btn-solid" onClick={() => setOpen(true)}>
         <Plus size={15} /> New tool
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Add a tool" wide>
+      <Modal open={open} onClose={() => setOpen(false)} title="Add a tool">
         <ToolForm onDone={() => setOpen(false)} />
       </Modal>
     </>
@@ -144,10 +146,10 @@ export function ToolActions({ tool }: { tool: Tool }) {
       <button className="btn btn-sm" onClick={() => setOpen(true)}>
         <Pencil size={13} /> Edit
       </button>
-      <button className="btn btn-sm text-pulse hover:border-pulse" disabled={pending} onClick={remove}>
+      <button className="btn btn-sm btn-coral" disabled={pending} onClick={remove}>
         <Trash2 size={13} /> Delete
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Edit tool" wide>
+      <Modal open={open} onClose={() => setOpen(false)} title="Edit tool">
         <ToolForm initial={tool} onDone={() => setOpen(false)} />
       </Modal>
     </span>

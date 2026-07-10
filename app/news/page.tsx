@@ -1,4 +1,4 @@
-import { ExternalLink, HeartPulse } from "lucide-react";
+import { ExternalLink, Newspaper } from "lucide-react";
 import DbNotice from "@/components/DbNotice";
 import { RemoveNewsButton } from "@/components/news-client";
 import { getNews } from "@/lib/queries";
@@ -22,16 +22,16 @@ export default async function NewsPage() {
       day: "numeric",
       month: "long",
       year: "numeric",
-      timeZone: "Asia/Jerusalem", // server runs in UTC; group by the team's day
+      timeZone: "Asia/Jerusalem",
     });
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(item);
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
-      <p className="label">Auto-curated every two days</p>
-      <h1 className="font-display text-3xl font-bold tracking-tight">Cardiology AI news</h1>
+    <div className="mx-auto max-w-[760px]">
+      <span className="eyebrow badge-teal">Auto-curated every two days</span>
+      <h1 className="mt-3 font-display text-3xl font-extrabold tracking-tight">Cardiology AI news</h1>
       <p className="mt-2 max-w-xl text-sm text-soft">
         Headlines where AI meets cardiology — collected from targeted feeds, screened for relevance by
         Claude, removable by you if something slips through.
@@ -39,8 +39,8 @@ export default async function NewsPage() {
       {dbError && <DbNotice />}
       {!dbError && news.length === 0 && (
         <div className="card mt-8 p-10 text-center">
-          <HeartPulse className="mx-auto text-pulse" size={22} />
-          <p className="mt-3 font-display text-lg font-semibold">No news yet</p>
+          <Newspaper className="mx-auto" style={{ color: "var(--teal)" }} size={22} />
+          <p className="mt-3 font-display text-lg font-bold">No news yet</p>
           <p className="mt-1 text-sm text-soft">
             The news worker runs every two days. It can also be triggered manually with{" "}
             <code className="font-mono">npm run fetch-news</code>.
@@ -48,23 +48,22 @@ export default async function NewsPage() {
         </div>
       )}
       {[...groups.entries()].map(([date, items]) => (
-        <section key={date} className="mt-8">
+        <section key={date} className="mt-9">
           <div className="flex items-center gap-3">
-            <h2 className="shrink-0 font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-faint">
-              {date}
-            </h2>
-            <div className="h-px flex-1 bg-line" />
+            <h2 className="shrink-0 text-[11px] font-bold uppercase tracking-widest text-faint">{date}</h2>
+            <div className="h-px flex-1" style={{ background: "var(--line)" }} />
           </div>
           <div className="mt-3 flex flex-col gap-3">
             {items.map((n) => (
-              <article key={n.id} className="card rise p-5">
-                <p className="font-mono text-[11px] uppercase tracking-wider text-faint">
+              <article key={n.id} className="card rise p-6" style={{ borderRadius: "22px" }}>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-faint">
                   {n.source || "News"}
                   {n.published_at
                     ? ` · ${new Date(n.published_at).toLocaleDateString("en-GB", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
+                        timeZone: "Asia/Jerusalem",
                       })}`
                     : ""}
                 </p>
@@ -72,7 +71,7 @@ export default async function NewsPage() {
                   href={n.url}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-1 block font-display text-lg font-semibold leading-snug tracking-tight transition-colors hover:text-pulse"
+                  className="mt-1 block font-display text-lg font-bold leading-snug tracking-tight transition-colors hover:opacity-80"
                 >
                   {n.title}
                 </a>
@@ -88,7 +87,8 @@ export default async function NewsPage() {
                       href={n.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-sm font-medium text-pulse hover:underline"
+                      className="inline-flex items-center gap-1 text-sm font-bold hover:underline"
+                      style={{ color: "var(--teal)" }}
                     >
                       Read full article <ExternalLink size={13} />
                     </a>

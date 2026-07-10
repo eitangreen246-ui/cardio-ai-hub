@@ -45,7 +45,9 @@ function IdeaForm({ initial, onDone }: { initial?: Recommendation; onDone: () =>
   return (
     <div className="flex flex-col gap-4">
       {error && (
-        <p className="rounded-lg border border-pulse/40 bg-pulse/5 px-3 py-2 text-sm text-pulse">{error}</p>
+        <p className="rounded-2xl border px-3.5 py-2.5 text-sm" style={{ borderColor: "color-mix(in oklch, var(--coral) 40%, transparent)", background: "color-mix(in oklch, var(--coral) 6%, transparent)", color: "var(--coral)" }}>
+          {error}
+        </p>
       )}
       <div>
         <label className="label">Idea name *</label>
@@ -59,7 +61,7 @@ function IdeaForm({ initial, onDone }: { initial?: Recommendation; onDone: () =>
       <div>
         <label className="label">Purpose</label>
         <textarea
-          className="field min-h-24"
+          className="field field-block min-h-24"
           value={purpose}
           onChange={(e) => setPurpose(e.target.value)}
           placeholder="What problem would it solve for the team?"
@@ -106,11 +108,11 @@ function IdeaForm({ initial, onDone }: { initial?: Recommendation; onDone: () =>
           </select>
         </div>
       )}
-      <div className="flex justify-end gap-2">
+      <div className="mt-1 flex justify-end gap-2">
         <button className="btn" onClick={onDone}>
           Cancel
         </button>
-        <button className="btn btn-primary" disabled={pending} onClick={submit}>
+        <button className="btn btn-amber btn-solid" disabled={pending} onClick={submit}>
           {initial ? "Save changes" : "Submit idea"}
         </button>
       </div>
@@ -122,10 +124,10 @@ export function NewIdeaButton() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-primary" onClick={() => setOpen(true)}>
+      <button className="btn btn-amber btn-solid" onClick={() => setOpen(true)}>
         <Plus size={15} /> New idea
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Propose an AI tool" wide>
+      <Modal open={open} onClose={() => setOpen(false)} title="Propose an AI tool">
         <IdeaForm onDone={() => setOpen(false)} />
       </Modal>
     </>
@@ -155,10 +157,10 @@ export function IdeaActions({ idea }: { idea: Recommendation }) {
       <button className="btn btn-sm" onClick={() => setOpen(true)}>
         <Pencil size={13} /> Edit
       </button>
-      <button className="btn btn-sm text-pulse hover:border-pulse" disabled={pending} onClick={remove}>
+      <button className="btn btn-sm btn-coral" disabled={pending} onClick={remove}>
         <Trash2 size={13} /> Delete
       </button>
-      <Modal open={open} onClose={() => setOpen(false)} title="Edit idea" wide>
+      <Modal open={open} onClose={() => setOpen(false)} title="Edit idea">
         <IdeaForm initial={idea} onDone={() => setOpen(false)} />
       </Modal>
     </span>

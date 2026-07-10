@@ -29,7 +29,7 @@ export default function CopyButton({
   };
 
   return (
-    <button onClick={copy} className={`btn ${small ? "btn-sm" : ""} ${copied ? "border-mint text-mint" : ""}`}>
+    <button onClick={copy} className={`btn ${small ? "btn-sm" : ""} ${copied ? "btn-success" : ""}`}>
       {copied ? <Check size={small ? 13 : 15} /> : <Copy size={small ? 13 : 15} />}
       {copied ? "Copied" : "Copy"}
     </button>

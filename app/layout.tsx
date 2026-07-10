@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
+import { Figtree, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 
-const display = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage" });
-const sans = IBM_Plex_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-plex" });
-const mono = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--font-plex-mono" });
+const display = Figtree({ subsets: ["latin"], weight: ["500", "600", "700", "800", "900"], variable: "--font-figtree" });
+const sans = Nunito_Sans({ subsets: ["latin"], weight: ["400", "500", "600", "700", "800"], variable: "--font-nunito" });
 
 export const metadata: Metadata = {
   title: { default: "Cardio AI Hub", template: "%s · Cardio AI Hub" },
@@ -17,20 +16,16 @@ const themeInit = `try{var t=localStorage.getItem("cah-theme");if(t==="light"||t
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html
-      lang="en"
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
-      suppressHydrationWarning
-    >
+    <html lang="en" className={`${display.variable} ${sans.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
       </head>
       <body className="min-h-screen bg-bg font-sans text-ink antialiased">
         <Header />
-        <main className="mx-auto w-full max-w-6xl px-4 pb-16 pt-8 sm:px-6">{children}</main>
+        <main className="mx-auto w-full max-w-6xl px-6 pb-16 pt-8">{children}</main>
         <footer className="border-t border-line py-6">
-          <p className="text-center font-mono text-[11px] uppercase tracking-[0.14em] text-faint">
-            Cardio AI Hub · internal tool · never paste patient data
+          <p className="text-center text-[11px] font-bold uppercase tracking-widest text-faint">
+            Cardio AI Hub · Internal tool · Never paste patient data
           </p>
         </footer>
       </body>
